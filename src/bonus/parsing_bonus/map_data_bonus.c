@@ -1,6 +1,6 @@
-#include "../src/mandatory/inc/cub3d.h"
-#include "../src/mandatory/inc/parse_err.h"
-#include "../src/mandatory/inc/mlx_win.h"
+#include "../inc_bonus/cub3d_bonus.h"
+#include "../inc_bonus/parse_err_bonus.h"
+#include "../inc_bonus/mlx_win_bonus.h"
 
 /*
 * CheckList for the Data ABOVE the map.
@@ -14,6 +14,7 @@ TODO color: check that integer doesn't exceed 0 - 255. 🤗
 void	init_texture(t_config **conf)
 {
 	(*conf)->count_data = 0;
+	(*conf)->door_text = NULL;
 	(*conf)->no_text = NULL;
 	(*conf)->so_text = NULL;
 	(*conf)->we_text = NULL;
@@ -67,14 +68,15 @@ char	**get_wall_texture(t_config **conf)
 {
 	char	**table;
 
-	table = malloc(sizeof(char *) * 4);
+	table = malloc(sizeof(char *) * 5);
 	if (!table)
 		return (NULL);
 	table[0] = (*conf)->no_text;
 	table[1] = (*conf)->so_text;
 	table[2] = (*conf)->ea_text;
 	table[3] = (*conf)->we_text;
-	table[4] = NULL;
+	table[4] = "./src/bonus/textures_bonus/door.xpm";  // a supp de la partie normale
+	table[5] = NULL;
 	return (table);
 }
 
@@ -92,7 +94,7 @@ int	stock_image(t_config **conf, t_vars *mlx)
 	width = TEXTURE_W;
 	height = TEXTURE_H;
 	wall_text = get_wall_texture(conf);
-	while (++i < 4)
+	while (++i < 5)
 	{
 		(*conf)->text[i].img = mlx_xpm_file_to_image(mlx->mlx, \
 			wall_text[i], &width, &height);
@@ -116,10 +118,13 @@ int	check_data(t_config **conf)
 	while (++i < (*conf)->map_loc)
 		if (get_textures(conf, i) == ERROR || get_colors(conf, i) == ERROR)
 			return (ERROR);
+	printf("oui\n");
 	if ((*conf)->count_data != 6)
 		return (ft_putendl_fd(ELEMENT_ERR, STDERR_FILENO));
+	printf("oui2\n");
 	if (same_color(conf) == ERROR)
 		return (ERROR);
+	printf("oui3\n");
 	if (initialize_mlx_win(conf) || stock_image(conf, (*conf)->mlx) == FAILS)
 		return (ERROR);
 	return (SUCCES);

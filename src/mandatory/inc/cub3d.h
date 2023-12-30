@@ -30,7 +30,6 @@ typedef enum e_dir
 	SOUTH,
 	EAST,
 	WEST,
-	DOOR  //partie bonus
 }	t_dir;
 
 // char position in map struct for parsing purposes, kquetat-
@@ -85,7 +84,6 @@ typedef struct s_ray
 	int		tex_y; // y coordinate on the texture
 	double	step_text;
 	double	text_pos;
-	bool	door_hit;
 }	t_ray;
 
 typedef struct	s_vars
@@ -114,7 +112,6 @@ typedef struct s_config
 	char 	*so_text;// epraduro
 	char 	*we_text;// epraduro
 	char 	*ea_text;// epraduro
-	char	*door_text; // bonus
 	int		no_find;
 	int		so_find;
 	int		we_find;
@@ -123,24 +120,15 @@ typedef struct s_config
 	int 	c_find;// epraduro
 	char	**f_color;// epraduro
 	char	**c_color;// epraduro
-	double	pos_mmap_x; //partie bonus
-	double	pos_mmap_y; // partie bonus
 	/*
 	mlx window
 	donnees parsing
 	map**
 	*/
-	t_vars		text[5];
+	t_vars		text[4];
 	t_vars		*mlx;
-	t_vars		wall;  //partie bonus
-	t_vars		empty;  //partie bonus
-	t_vars		tex_player;  //partie bonus
-	t_vars		floor;  //partie bonus
-	t_vars		door_o; //partie bonus
-	t_vars		door_c; //partie bonus
 	t_ray		*ray;
 	t_player	*character;
-	bool		mouse_show;
 }	t_config;
 
 
@@ -194,8 +182,4 @@ char *format_path_texture(char *str);
 
 int ft_contain(char *str, char *find);
 
-int	load_map(t_config **conf, t_vars *vars);
-void	load_img(t_config **conf);
 // int	ft_close(t_vars *vars);
-
-int	inspect_map_bonus(t_config **conf);

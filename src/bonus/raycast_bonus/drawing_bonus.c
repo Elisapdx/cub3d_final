@@ -1,6 +1,6 @@
-#include "../src/mandatory/inc/cub3d.h"
-#include "../src/mandatory/inc/mlx_win.h"
-#include "../src/mandatory/inc/parse_err.h"
+#include "../inc_bonus/cub3d_bonus.h"
+#include "../inc_bonus/parse_err_bonus.h"
+#include "../inc_bonus/mlx_win_bonus.h"
 
 /*
 * 1. ce calcul permet de placer chaque colonne de l'ecran dans l'intervalle -1 à 1. 
@@ -57,6 +57,7 @@ void	start_dda_algo(char **map, t_ray *ray)
 {
 	bool	wall_hit;
 
+	ray->door_hit = false;
 	wall_hit = false;
 	while (wall_hit != true)
 	{
@@ -72,8 +73,11 @@ void	start_dda_algo(char **map, t_ray *ray)
 			ray->map_y += ray->step_y;
 			ray->side = true;
 		}
-		if (map[ray->map_x][ray->map_y] == '1')
+		if (map[ray->map_x][ray->map_y] == '1' \
+			|| map[ray->map_x][ray->map_y] == '2')
 			wall_hit = true;
+		if (map[ray->map_x][ray->map_y] == '2')
+			ray->door_hit = true;
 	}
 }
 
@@ -116,8 +120,8 @@ void	fill_colors(char **color_table, int *to_fill)
 void	draw_floor_sky(t_config **conf, int draw_start, int x)
 {
 	// int x;
-	// // int middle;
-	// // middle = WIDTH * HEIGHT / 2 - 1; // indice du pixel au milieu de la hauteur totale de la fenêtre à la dernière colonne
+	// int middle;
+	// middle = WIDTH * HEIGHT / 2 - 1; // indice du pixel au milieu de la hauteur totale de la fenêtre à la dernière colonne
 	// x = HEIGHT * WIDTH - 1; // indice du dernier élément dans un tableau stockes par colonnes
 	int	color_c;
 	int	color_f;
@@ -143,6 +147,8 @@ void	draw_floor_sky(t_config **conf, int draw_start, int x)
 int	find_orientation(t_ray *ray, t_player *p)
 {
 	// regarder si le rayon correspond a un mur sur le cote droit
+	if (ray->door_hit == true)
+		return (DOOR);
 	if (ray->side == true && p->pos_y < ray->map_y)
 		return (EAST);
 	else if (ray->side == true && p->pos_y > ray->map_y)
@@ -164,7 +170,9 @@ void	apply_texture(t_config **conf, int dir, int x, int y)
 
 	color = 0;
 	r = (*conf)->ray;
-	if (dir == NORTH)
+	if (dir == DOOR)
+		color = get_pixel_color(&(*conf)->text[DOOR], r->tex_x, r->tex_y);
+	else if (dir == NORTH)
 		color = get_pixel_color(&(*conf)->text[NORTH], r->tex_x, r->tex_y);
 	else if (dir == SOUTH)
 		color = get_pixel_color(&(*conf)->text[SOUTH], r->tex_x, r->tex_y);
@@ -245,6 +253,7 @@ void	init_ray_struct(t_ray *ray)
 	ray->step_x = 0;
 	ray->step_y = 0;
 	ray->side = false;
+	ray->door_hit = false;
 	ray->wall_dist = 0;
 	ray->line_height = 0;
 	ray->draw_end = 0;
@@ -258,9 +267,11 @@ void	do_move(t_config **conf, double new_x, double new_y)
 
 	map = (*conf)->map;
 	p = (*conf)->character;
-	if (map[(int)(p->pos_x + new_x * (MOVE_SPEED + 0.1))][(int)(p->pos_y)] != '1')
+	if (map[(int)(p->pos_x + new_x * (MOVE_SPEED + 0.1))][(int)(p->pos_y)] != '1' \
+		&& map[(int)(p->pos_x + new_x * (MOVE_SPEED + 0.1))][(int)(p->pos_y)] != '2')
 		p->pos_x += new_x * MOVE_SPEED;
-	if (map[(int)(p->pos_x)][(int)(p->pos_y + new_y * (MOVE_SPEED + 0.1))] != '1')
+	if (map[(int)(p->pos_x)][(int)(p->pos_y + new_y * (MOVE_SPEED + 0.1))] != '1' \
+		&& map[(int)(p->pos_x)][(int)(p->pos_y + new_y * (MOVE_SPEED + 0.1))] != '2')
 		p->pos_y += new_y * MOVE_SPEED;
 }
 
@@ -310,9 +321,59 @@ void	rotate_keys(t_config **conf, int key_pressed)
 	}
 }
 
+int	mouse_move(t_config **conf)
+{
+	int	x;
+	int	y;
+
+	if ((*conf)->mouse_show == true)
+	{
+		mlx_mouse_show();
+		return (0);
+	}
+	mlx_mouse_hide();
+	mlx_mouse_get_pos((*conf)->mlx->win, &x, &y);
+	if (x < WIDTH / 2)
+		rotate_keys(conf, LEFT_KEY);
+	else if (x > WIDTH / 2)
+		rotate_keys(conf, RIGHT_KEY);
+	mlx_mouse_move((*conf)->mlx->win, WIDTH / 2, HEIGHT / 2);
+	render_game(conf, (*conf)->ray, (*conf)->character);
+	load_map(conf, (*conf)->mlx);
+	return (1);
+}
+
 void	destroy_and_exit()
 {
 	exit(1);
+}
+
+void	handle_door(t_config **conf)
+{
+	int			i;
+	t_player	*p;
+
+	i = -1;
+	p = (*conf)->character;
+	while ((*conf)->map[++i])
+	{
+		int j = -1;
+		while ((*conf)->map[i][++j])
+		{
+			if ((*conf)->map[i][j] == '2')
+			{
+				if ((int)p->pos_x == i && (int)p->pos_y == j)
+					return ;
+				(*conf)->map[i][j] = '3';
+			}
+			else if ((*conf)->map[i][j] == '3')
+			{
+				if ((int)p->pos_x == i && (int)p->pos_y == j)
+					return ;
+				(*conf)->map[i][j] = '2';
+			}
+		}
+	}
 }
 
 int	key_handler(int key_pressed, t_config **conf)
@@ -322,6 +383,18 @@ int	key_handler(int key_pressed, t_config **conf)
 	p = (*conf)->character;
 	if (key_pressed == ESC_KEY)
 		destroy_and_exit();
+	if (key_pressed == 46 && !(*conf)->mouse_show)
+	{
+		(*conf)->mouse_show = true;
+		return (0);
+	}
+	else if (key_pressed == 46 && (*conf)->mouse_show)
+	{
+		(*conf)->mouse_show = false;
+		return (0);
+	}
+	else if (key_pressed == 49)
+		handle_door(conf);
 	move_keys(conf, key_pressed);
 	rotate_keys(conf, key_pressed);
 	mlx_destroy_image((*conf)->mlx->mlx, (*conf)->mlx->img);
@@ -333,6 +406,7 @@ int	key_handler(int key_pressed, t_config **conf)
 	if ((*conf)->mlx->addr == NULL)
 		return (FAILS);
 	render_game(conf, (*conf)->ray, p);
+	load_map(conf, (*conf)->mlx);
 	return (0);
 }
 
@@ -362,8 +436,13 @@ int	init_game(t_config **conf)
 	if (!(*conf)->ray)
 		return (ft_putendl_fd(MALLOC_ERR, STDERR_FILENO));
 	init_ray_struct((*conf)->ray);
+	load_img(conf);
 	render_game(conf, (*conf)->ray, (*conf)->character);
 	mlx_put_image_to_window(mlx->mlx, mlx->win, mlx->img, 0, 0);
+	if (load_map(conf, (*conf)->mlx) != SUCCES)
+		return (ft_putendl_fd(MINMAP_ERR, STDERR_FILENO));
+	(*conf)->mouse_show = false;
+	mlx_loop_hook(mlx->mlx, &mouse_move, conf);
 	mlx_hook(mlx->win, 2, 1L << 0, &key_handler, conf);
 	mlx_hook(mlx->win, 17, 0, ft_close, conf);
 	mlx_loop(mlx->mlx);

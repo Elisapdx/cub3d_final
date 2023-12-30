@@ -1,7 +1,7 @@
-#include "../src/mandatory/inc/cub3d.h"
-#include "../src/mandatory/inc/parse_err.h"
-#include "../src/mandatory/inc/mlx_win.h"
-#include "../src/mandatory/inc/mlx_err.h"
+#include "../inc_bonus/cub3d_bonus.h"
+#include "../inc_bonus/parse_err_bonus.h"
+#include "../inc_bonus/mlx_win_bonus.h"
+#include "../inc_bonus/mlx_err_bonus.h"
 
 void	my_mlx_pixel_put(t_vars *data, int x, int y, int color)
 {
@@ -27,15 +27,18 @@ int	initialize_mlx_win(t_config **conf)
 	(*conf)->mlx->mlx = mlx_init();
 	if ((*conf)->mlx->mlx == NULL)
 		return (ft_putendl_fd(INIT_ERR, STDERR_FILENO));
+	printf("oui11\n");
 	(*conf)->mlx->win = mlx_new_window((*conf)->mlx->mlx, WIDTH, HEIGHT, "Cub3D");
 	if ((*conf)->mlx->win == NULL)
 		return (FAILS);
 	(*conf)->mlx->img = mlx_new_image((*conf)->mlx->mlx, WIDTH, HEIGHT);
 	if ((*conf)->mlx->img == NULL)
 		return (FAILS);
+	printf("oui22\n");
 	(*conf)->mlx->addr = mlx_get_data_addr((*conf)->mlx->img, \
 		&(*conf)->mlx->bpp, &(*conf)->mlx->line_len, &(*conf)->mlx->endian);
 	if ((*conf)->mlx->addr == NULL)
 		return (FAILS);
+	printf("oui33\n");
 	return (0);
 }

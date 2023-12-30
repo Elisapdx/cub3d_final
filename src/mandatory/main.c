@@ -1,5 +1,5 @@
-#include "cub3d.h"
-#include "parse_err.h"
+#include "inc/cub3d.h"
+#include "inc/parse_err.h"
 
 /*
 * CheckList for the Map: kquetat-

@@ -1,5 +1,5 @@
-#include "../src/mandatory/inc/cub3d.h"
-#include "../src/mandatory/inc/parse_err.h"
+#include "../inc_bonus/cub3d_bonus.h"
+#include "../inc_bonus/parse_err_bonus.h"
 
 void	examine_path(t_config **conf, char **map, t_pos pos, char *to_fill)
 {

@@ -1,5 +1,5 @@
-#include "../src/mandatory/inc/cub3d.h"
-#include "../src/mandatory/inc/parse_err.h"
+#include "../inc_bonus/cub3d_bonus.h"
+#include "../inc_bonus/parse_err_bonus.h"
 
 static char	**collect_map(t_config **conf)
 {

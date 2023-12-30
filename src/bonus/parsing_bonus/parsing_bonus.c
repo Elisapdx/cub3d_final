@@ -1,5 +1,5 @@
-#include "../src/mandatory/inc/cub3d.h"
-#include "../src/mandatory/inc/parse_err.h"
+#include "../inc_bonus/cub3d_bonus.h"
+#include "../inc_bonus/parse_err_bonus.h"
 
 char	**map_dup(t_config **conf, char **map)
 {
@@ -37,7 +37,7 @@ int	inspect_map(t_config **conf)
 	(*conf)->player = 0;
 	while ((*conf)->map[++i])
 	{
-		if (inspect_line(conf, (*conf)->map[i], "10 NWES") == false)
+		if (inspect_line(conf, (*conf)->map[i], "102 NWES") == false)
 			return (ft_putendl_fd(CHAR_ERR, STDERR_FILENO));
 		else if ((*conf)->player > 1)
 			return (ft_putendl_fd(PLAYER_ERR, STDERR_FILENO));
@@ -46,7 +46,6 @@ int	inspect_map(t_config **conf)
 	tmp = map_dup(conf, (*conf)->map);
 	if (!tmp)
 		return (ft_putendl_fd(MALLOC_ERR, STDERR_FILENO));
-	//here
 	if (flood_fill(conf, tmp) == false)
 		return (FAILS);
 	return (0);
@@ -110,8 +109,5 @@ int	parse_data(t_config **conf, char **av)
 		return (FAILS);
 	else if (check_data(conf) == 2)
 		return (2);
-	// print_map(conf);
-	// if (map_data(conf, av) == FAILS)
-		// return (-1);
 	return (0);
 }

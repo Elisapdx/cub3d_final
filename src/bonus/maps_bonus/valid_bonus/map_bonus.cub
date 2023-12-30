@@ -1,11 +1,10 @@
-NO ./src/mandatory/textures/north.xpm    
+NO ./src/bonus/textures_bonus/north_bonus.xpm    
 
-SO ./src/mandatory/textures/south.xpm   
+SO ./src/bonus/textures_bonus/south_bonus.xpm   
 
+WE          ./src/bonus/textures_bonus/west_bonus.xpm   
 
-WE           ./src/mandatory/textures/west.xpm   
-
-EA ./src/mandatory/textures/east.xpm 
+EA ./src/bonus/textures_bonus/east_bonus.xpm 
 
 F                  56,62,66
 C 135,206,250
@@ -13,7 +12,7 @@ C 135,206,250
         1111111111111111111111111
         1000000000110000000000001
         1011000001110000000000001
-        1001000000000W00000000001
+        1001000000020W00000000001
 111111111011000001110000000000001
 100000000011000001110111111111111
 11110111111111011100000010001
