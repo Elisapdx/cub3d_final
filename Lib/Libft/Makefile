@@ -11,7 +11,6 @@ SRC	=	${addprefix ${SRC_PATH}, ft_atoi.c \
 										ft_bzero.c \
 										ft_calloc.c \
 										ft_isdigit.c \
-										ft_itoa.c \
 										ft_putchar_fd.c \
 										ft_putendl_fd.c \
 										ft_putnbr_fd.c \
