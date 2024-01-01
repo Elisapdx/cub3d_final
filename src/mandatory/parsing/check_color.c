@@ -1,5 +1,17 @@
-#include "../src/mandatory/inc/cub3d.h"
-#include "../src/mandatory/inc/parse_err.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   check_color.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: epraduro <epraduro@student.42nice.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/01/01 13:40:56 by epraduro          #+#    #+#             */
+/*   Updated: 2024/01/01 13:40:57 by epraduro         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../inc/mandatory/cub3d.h"
+#include "../inc/mandatory/err_type.h"
 
 int	ft_strcmp(char *s1, char *s2)
 {
@@ -25,22 +37,24 @@ int	len_tab(char **tab)
 
 int	same_color(t_config **conf)
 {
-	int	i;
+	int		i;
+	t_data	*data;
 
 	i = 0;
-	if ((*conf)->c_color[0] && (*conf)->c_color[1] && (*conf)->c_color[2]
-		&& (*conf)->f_color[0] && (*conf)->f_color[1] && (*conf)->f_color[2])
+	data = (*conf)->data;
+	if (data->c_color[0] && data->c_color[1] && data->c_color[2]
+		&& data->f_color[0] && data->f_color[1] && data->f_color[2])
 	{
-		if (ft_strcmp((*conf)->c_color[0], (*conf)->f_color[0]) == 0)
+		if (ft_strcmp(data->c_color[0], data->f_color[0]) == 0)
 			i++;
-		if (ft_strcmp((*conf)->c_color[1], (*conf)->f_color[1]) == 0)
+		if (ft_strcmp(data->c_color[1], data->f_color[1]) == 0)
 			i++;
-		if (ft_strcmp((*conf)->c_color[2], (*conf)->f_color[2]) == 0)
+		if (ft_strcmp(data->c_color[2], data->f_color[2]) == 0)
 			i++;
 		if (i != 3)
-			return (SUCCES);
+			return (SUCCESS);
 		else
-			return (ft_putendl_fd(COLOR_ERR, STDERR_FILENO));
+			return (free_table_err(conf, COLOR_ERR, DATA_ERR));
 	}
 	else
 		return (ERROR);
@@ -60,7 +74,7 @@ int	valid_color(char **color)
 			return (ft_putendl_fd(NB_COLOR_ERR, STDERR_FILENO));
 		i++;
 	}
-	return (SUCCES);
+	return (SUCCESS);
 }
 
 int	check_color(char ***color, char *str, int *data)
@@ -76,10 +90,10 @@ int	check_color(char ***color, char *str, int *data)
 	color[0] = ft_split(str + i, ',');
 	if (color[0] == NULL)
 		return (0);
-	if ((len_tab(color[0]) == 3 && valid_color(color[0]) == SUCCES))
+	if ((len_tab(color[0]) == 3 && valid_color(color[0]) == SUCCESS))
 	{
 		(*data)++;
-		return (SUCCES);
+		return (SUCCESS);
 	}
 	else
 		return (ERROR);

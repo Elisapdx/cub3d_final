@@ -1,0 +1,59 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   stock_img_bonus.c                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: epraduro <epraduro@student.42nice.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/12/31 16:10:14 by epraduro          #+#    #+#             */
+/*   Updated: 2024/01/01 16:46:13 by epraduro         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../inc/bonus/cub3d_bonus.h"
+#include "../inc/bonus/err_type_bonus.h"
+
+char	**get_wall_texture(t_config **conf)
+{
+	char	**table;
+
+	table = malloc(sizeof(char *) * 5);
+	if (!table)
+		return (NULL);
+	table[0] = (*conf)->data->no_text;
+	table[1] = (*conf)->data->so_text;
+	table[2] = (*conf)->data->ea_text;
+	table[3] = (*conf)->data->we_text;
+	table[4] = "./src/bonus/textures_bonus/door.xpm";
+	table[5] = NULL;
+	return (table);
+}
+
+int	stock_image(t_config **conf)
+{
+	int		i;
+	int		width;
+	int		height;
+	char	**wall_text;
+	t_mlx	*mlx;
+
+	i = -1;
+	mlx = (*conf)->mlx;
+	width = TEXTURE_W;
+	height = TEXTURE_H;
+	wall_text = get_wall_texture(conf);
+	while (++i < 5)
+	{
+		(*conf)->text[i].img = mlx_xpm_file_to_image(mlx->mlx, \
+			wall_text[i], &width, &height);
+		if (!(*conf)->text[i].img)
+			return (-1);
+		(*conf)->text[i].addr = mlx_get_data_addr((*conf)->text[i].img, \
+			&(*conf)->text[i].bpp, &(*conf)->text[i].line_len, \
+			&(*conf)->text[i].endian);
+		if (!(*conf)->text[i].addr)
+			return (-1);
+	}
+	free(wall_text);
+	return (SUCCESS);
+}

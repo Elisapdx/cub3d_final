@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   drawing.c                                          :+:      :+:    :+:   */
+/*   new_drawing_bonus.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: epraduro <epraduro@student.42nice.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/01 13:43:17 by epraduro          #+#    #+#             */
-/*   Updated: 2024/01/01 13:43:18 by epraduro         ###   ########.fr       */
+/*   Created: 2024/01/01 14:10:26 by epraduro          #+#    #+#             */
+/*   Updated: 2024/01/01 16:42:38 by epraduro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/mandatory/cub3d.h"
-#include "../inc/mandatory/err_type.h"
+#include "../inc/bonus/cub3d_bonus.h"
+#include "../inc/bonus/err_type_bonus.h"
 
 void	draw_floor_sky(t_config **conf, int draw_start, int x)
 {
@@ -38,6 +38,8 @@ void	draw_floor_sky(t_config **conf, int draw_start, int x)
 
 int	find_orientation(t_ray *ray, t_player *p)
 {
+	if (ray->door_hit == true)
+		return (DOOR);
 	if (ray->side == true && p->pos_y < ray->map_y)
 		return (EAST);
 	else if (ray->side == true && p->pos_y > ray->map_y)
@@ -92,16 +94,18 @@ int	render_game(t_config **conf, t_ray *ray, t_player *usr)
 
 int	init_game(t_config **conf)
 {
-	t_mlx	*mlx;
-
-	mlx = (*conf)->mlx;
 	init_ray_struct(conf);
+	load_img(conf);
 	if (!(*conf)->ray)
 		return (ft_putendl_fd(MALLOC_ERR, STDERR_FILENO));
 	if (render_game(conf, (*conf)->ray, (*conf)->usr) < 0)
 		return (-1);
-	mlx_hook(mlx->win, 2, 1L << 0, &key_handler, conf);
-	mlx_hook(mlx->win, 17, 0, ft_close, conf);
-	mlx_loop(mlx->mlx);
+	if (load_map(conf, (*conf)->mlx->mlx) != SUCCESS)
+		return (ft_putendl_fd(MINMAP_ERR, STDERR_FILENO));
+	(*conf)->data->mouse_show = false;
+	mlx_loop_hook((*conf)->mlx->mlx, &mouse_move, conf);
+	mlx_hook((*conf)->mlx->win, 2, 1L << 0, &key_handler, conf);
+	mlx_hook((*conf)->mlx->win, 17, 0, ft_close, conf);
+	mlx_loop((*conf)->mlx->mlx);
 	return (SUCCESS);
 }

@@ -1,17 +1,17 @@
-#include "../src/mandatory/inc/cub3d.h"
-#include "../src/mandatory/inc/parse_err.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_texture.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: epraduro <epraduro@student.42nice.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/01/01 13:41:12 by epraduro          #+#    #+#             */
+/*   Updated: 2024/01/01 13:41:13 by epraduro         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-// int	skip(char *line)
-// {
-// 	int	i;
-
-// 	i = 0;
-// 	while (line[i] && line[i] != ' ' && line[i] != '\t')
-// 		i++;
-// 	while (line[i] && (line[i] == ' ' || line[i] == '\t'))
-// 		i++;
-// 	return (i);
-// }
+#include "../inc/mandatory/cub3d.h"
+#include "../inc/mandatory/err_type.h"
 
 int	ft_contain(char *str, char *find)
 {
@@ -54,10 +54,10 @@ int	check_path(char *arg)
 	if (fd < 0)
 		return (ft_putendl_fd(OPEN_ERR, STDERR_FILENO));
 	close(fd);
-	return (SUCCES);
+	return (SUCCESS);
 }
 
-int	get_texture_path(char *str, char **store_data, int *data)
+int	get_path(char *str, char **store_data, int *data)
 {
 	if (ft_contain(str, ".xpm") == 0)
 		return (ERROR);
@@ -69,48 +69,45 @@ int	get_texture_path(char *str, char **store_data, int *data)
 	return (check_path(*store_data));
 }
 
-int	get_textures(t_config **conf, int i)
+int	get_textures(char **file, t_data *data, int i)
 {
-	if (ft_contain((*conf)->file[i], "NO"))
+	if (ft_contain(file[i], "NO"))
 	{
-		if (get_texture_path((*conf)->file[i],
-				&(*conf)->no_text, &(*conf)->count_data) == ERROR)
+		if (get_path(file[i], &data->no_text, &data->count_data) == ERROR)
 			return (ft_putendl_fd(PATH_ERR, STDERR_FILENO));
 	}
-	else if (ft_contain((*conf)->file[i], "SO"))
+	else if (ft_contain(file[i], "SO"))
 	{
-		if (get_texture_path((*conf)->file[i],
-				&(*conf)->so_text, &(*conf)->count_data) == ERROR)
+		if (get_path(file[i], &data->so_text, &data->count_data) == ERROR)
 			return (ft_putendl_fd(PATH_ERR, STDERR_FILENO));
 	}
-	else if (ft_contain((*conf)->file[i], "WE"))
+	else if (ft_contain(file[i], "WE"))
 	{
-		if (get_texture_path((*conf)->file[i],
-				&(*conf)->we_text, &(*conf)->count_data) == ERROR)
+		if (get_path(file[i], &data->we_text, &data->count_data) == ERROR)
 			return (ft_putendl_fd(PATH_ERR, STDERR_FILENO));
 	}
-	else if (ft_contain((*conf)->file[i], "EA"))
+	else if (ft_contain(file[i], "EA"))
 	{
-		if (get_texture_path((*conf)->file[i],
-				&(*conf)->ea_text, &(*conf)->count_data) == ERROR)
+		if (get_path(file[i], &data->ea_text, &data->count_data) == ERROR)
 			return (ft_putendl_fd(PATH_ERR, STDERR_FILENO));
 	}
-	return (SUCCES);
+	return (SUCCESS);
 }
 
-int	get_colors(t_config **conf, int i)
+int	get_colors(t_config **conf, char **file, int i)
 {
-	if (ft_strchr((*conf)->file[i], 'F'))
+	t_data	*data;
+
+	data = (*conf)->data;
+	if (ft_strchr(file[i], 'F'))
 	{
-		if (check_color(&(*conf)->f_color,
-				(*conf)->file[i], &(*conf)->count_data) == ERROR)
-			return (ERROR);
+		if (check_color(&data->f_color, file[i], &data->count_data) == ERROR)
+			return (MAP_ERR);
 	}
-	else if (ft_strchr((*conf)->file[i], 'C'))
+	else if (ft_strchr(file[i], 'C'))
 	{
-		if (check_color(&(*conf)->c_color,
-				(*conf)->file[i], &(*conf)->count_data) == ERROR)
-			return (ERROR);
+		if (check_color(&data->c_color, file[i], &data->count_data) == ERROR)
+			return (MAP_ERR);
 	}
-	return (SUCCES);
+	return (SUCCESS);
 }

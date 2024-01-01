@@ -1,24 +1,17 @@
-#include "../src/mandatory/inc/cub3d.h"
-#include "../src/mandatory/inc/parse_err.h"
-#include "../src/mandatory/inc/mlx_win.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   map_data.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: epraduro <epraduro@student.42nice.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/01/01 13:41:34 by epraduro          #+#    #+#             */
+/*   Updated: 2024/01/01 13:42:00 by epraduro         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-/*
-* CheckList for the Data ABOVE the map.
-TODO check if all data is present. 🤗
-TODO check if path of texture is valid. 🤗
-TODO check format of data SO, WE, NO, EA, C, F. 🤗
-TODO color: check that colors are separated by colons ",". 🤗
-TODO color: check that integer doesn't exceed 0 - 255. 🤗
-*/
-
-void	init_texture(t_config **conf)
-{
-	(*conf)->count_data = 0;
-	(*conf)->no_text = NULL;
-	(*conf)->so_text = NULL;
-	(*conf)->we_text = NULL;
-	(*conf)->ea_text = NULL;
-}
+#include "../inc/mandatory/cub3d.h"
+#include "../inc/mandatory/err_type.h"
 
 bool	is_dir(char *arg)
 {
@@ -63,64 +56,22 @@ char	*format_path_texture(char *str)
 	return (str);
 }
 
-char	**get_wall_texture(t_config **conf)
-{
-	char	**table;
-
-	table = malloc(sizeof(char *) * 4);
-	if (!table)
-		return (NULL);
-	table[0] = (*conf)->no_text;
-	table[1] = (*conf)->so_text;
-	table[2] = (*conf)->ea_text;
-	table[3] = (*conf)->we_text;
-	table[4] = NULL;
-	return (table);
-}
-
-/*
-* transform all xpm files to images for wall textures.
-*/
-int	stock_image(t_config **conf, t_vars *mlx)
+int	init_map_data(t_config **conf)
 {
 	int		i;
-	int		width;
-	int		height;
-	char	**wall_text;
+	char	**file;
+	t_data	*data;
 
 	i = -1;
-	width = TEXTURE_W;
-	height = TEXTURE_H;
-	wall_text = get_wall_texture(conf);
-	while (++i < 4)
-	{
-		(*conf)->text[i].img = mlx_xpm_file_to_image(mlx->mlx, \
-			wall_text[i], &width, &height);
-		if (!(*conf)->text[i].img)
-			return (FAILS);
-		(*conf)->text[i].addr = mlx_get_data_addr((*conf)->text[i].img, \
-			&(*conf)->text[i].bpp, &(*conf)->text[i].line_len, \
-			&(*conf)->text[i].endian);
-		if (!(*conf)->text[i].addr)
-			return (FAILS);
-	}
-	return (0);
-}
-
-int	check_data(t_config **conf)
-{
-	int	i;
-
-	i = -1;
-	init_texture(conf);
-	while (++i < (*conf)->map_loc)
-		if (get_textures(conf, i) == ERROR || get_colors(conf, i) == ERROR)
-			return (ERROR);
-	if ((*conf)->count_data != 6)
+	data = (*conf)->data;
+	file = (*conf)->map->file;
+	while (++i < (*conf)->map->map_loc)
+		if (get_textures(file, data, i) == -1
+			|| get_colors(conf, file, i) == -1)
+			return (DATA_ERR);
+	if (data->count_data != 6)
 		return (ft_putendl_fd(ELEMENT_ERR, STDERR_FILENO));
-	if (same_color(conf) == ERROR)
-		return (ERROR);
-	if (initialize_mlx_win(conf) || stock_image(conf, (*conf)->mlx) == FAILS)
-		return (ERROR);
-	return (SUCCES);
+	if (same_color(conf) == DATA_ERR)
+		return (DATA_ERR);
+	return (SUCCESS);
 }

@@ -1,25 +1,37 @@
-#include "../inc_bonus/cub3d_bonus.h"
-#include "../inc_bonus/parse_err_bonus.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   map_parser_bonus.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: epraduro <epraduro@student.42nice.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/01/01 14:08:51 by epraduro          #+#    #+#             */
+/*   Updated: 2024/01/01 16:38:38 by epraduro         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-static char	**collect_map(t_config **conf)
+#include "../inc/bonus/cub3d_bonus.h"
+#include "../inc/bonus/err_type_bonus.h"
+
+static char	**collect_map(t_map *map)
 {
 	int		i;
 	int		j;
-	char	**map;
+	char	**sketch;
 
-	i = (*conf)->map_loc;
 	j = 0;
-	map = malloc(sizeof(char *) * ((*conf)->map_len + 1));
-	if (!map)
+	i = map->map_loc;
+	sketch = malloc(sizeof(char *) * (map->map_len + 1));
+	if (!sketch)
 		return (NULL);
-	while ((*conf)->file[i])
+	while (map->file[i])
 	{
-		map[j] = trim_newline((*conf)->file[i], '\n');
+		sketch[j] = trim_newline(map->file[i], '\n');
 		i++;
 		j++;
 	}
-	map[j] = NULL;
-	return (map);
+	sketch[j] = NULL;
+	return (sketch);
 }
 
 static bool	scan_map(char *line)
@@ -34,28 +46,33 @@ static bool	scan_map(char *line)
 	return (false);
 }
 
-static int	pinpoint_map(t_config **conf)
+static void	pinpoint_map(t_map *map)
 {
 	int	i;
 
 	i = -1;
-	(*conf)->map_loc = 0;
-	while (++i < (*conf)->file_size)
+	map->map_loc = 0;
+	while (++i < map->file_size)
 	{
-		if (scan_map((*conf)->file[i]) == true)
+		if (scan_map(map->file[i]) == true)
 			break ;
-		(*conf)->map_loc++;
+		map->map_loc++;
 	}
-	return (0);
 }
 
 int	find_map(t_config **conf)
 {
-	if (pinpoint_map(conf) == FAILS)
-		return (FAILS);
-	(*conf)->map_len = map_len(conf);
-	(*conf)->map = collect_map(conf);
-	if (!(*conf)->map)
-		return (ft_putendl_fd(EMPTY_ERR, STDERR_FILENO));
-	return (0);
+	t_map	*map;
+
+	map = (*conf)->map;
+	pinpoint_map(map);
+	if (!map->map_loc)
+		return (ft_putendl_fd(LOC_ERR, -1));
+	map->map_len = map_len(map);
+	if (!map->map_len)
+		return (ft_putendl_fd(LEN_ERR, -1));
+	map->sketch = collect_map(map);
+	if (!map->sketch)
+		return (ft_putendl_fd(EMPTY_ERR, -1));
+	return (SUCCESS);
 }

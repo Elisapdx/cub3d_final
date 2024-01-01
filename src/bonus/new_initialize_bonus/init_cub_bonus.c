@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   init_cub.c                                         :+:      :+:    :+:   */
+/*   init_cub_bonus.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: epraduro <epraduro@student.42nice.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/01 13:37:14 by epraduro          #+#    #+#             */
-/*   Updated: 2024/01/01 13:37:38 by epraduro         ###   ########.fr       */
+/*   Created: 2023/12/31 16:03:09 by epraduro          #+#    #+#             */
+/*   Updated: 2024/01/01 16:37:39 by epraduro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/mandatory/cub3d.h"
-#include "../inc/mandatory/err_type.h"
+#include "../inc/bonus/cub3d_bonus.h"
+#include "../inc/bonus/err_type_bonus.h"
 
 void	setup_player(t_player *character, char c)
 {

@@ -1,7 +1,19 @@
-#include "../inc_bonus/cub3d_bonus.h"
-#include "../inc_bonus/parse_err_bonus.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parsing_bonus.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: epraduro <epraduro@student.42nice.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/01/01 14:09:22 by epraduro          #+#    #+#             */
+/*   Updated: 2024/01/01 16:47:51 by epraduro         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-char	**map_dup(t_config **conf, char **map)
+#include "../inc/bonus/cub3d_bonus.h"
+#include "../inc/bonus/err_type_bonus.h"
+
+char	**set_flood_fill(t_map *map, char **sketch)
 {
 	char	**tmp;
 	int		len;
@@ -10,17 +22,17 @@ char	**map_dup(t_config **conf, char **map)
 
 	i = -1;
 	j = 0;
-	tmp = ft_calloc(sizeof(char *), (*conf)->map_len + 3);
+	tmp = ft_calloc(sizeof(char *), map->map_len + 3);
 	if (!tmp)
 		return (NULL);
-	len = longest_line((*conf)->map) + 3;
-	while (++i < (*conf)->map_len + 2)
+	len = longest_line(sketch) + 3;
+	while (++i < map->map_len + 2)
 	{
-		if (i == 0 || i == (*conf)->map_len + 1)
+		if (i == 0 || i == map->map_len + 1)
 			tmp[i] = fill_extremities(tmp[i], len);
-		else if (map[j])
+		else if (sketch[j])
 		{
-			tmp[i] = fill_map(map[j], tmp[i], len);
+			tmp[i] = fill_map(sketch[j], tmp[i], len);
 			j++;
 		}
 	}
@@ -28,69 +40,55 @@ char	**map_dup(t_config **conf, char **map)
 	return (tmp);
 }
 
-int	inspect_map(t_config **conf)
+static int	inspect_map(t_config **conf)
 {
 	int		i;
 	char	**tmp;
+	t_map	*map;
 
 	i = -1;
-	(*conf)->player = 0;
-	while ((*conf)->map[++i])
+	map = (*conf)->map;
+	while (map->sketch[++i])
 	{
-		if (inspect_line(conf, (*conf)->map[i], "102 NWES") == false)
+		if (inspect_line(map, map->sketch[i], "102 NWES\t") == false)
 			return (ft_putendl_fd(CHAR_ERR, STDERR_FILENO));
-		else if ((*conf)->player > 1)
+		else if (map->num_player > 1)
 			return (ft_putendl_fd(PLAYER_ERR, STDERR_FILENO));
 	}
-	printf("numb of player: %d\n", (*conf)->player);
-	tmp = map_dup(conf, (*conf)->map);
+	tmp = set_flood_fill(map, map->sketch);
 	if (!tmp)
 		return (ft_putendl_fd(MALLOC_ERR, STDERR_FILENO));
-	if (flood_fill(conf, tmp) == false)
-		return (FAILS);
-	return (0);
+	if (flood_fill(map, tmp) == false)
+	{
+		free_double_p(tmp);
+		return (ft_putendl_fd(FLOOD_ERR, STDERR_FILENO));
+	}
+	free_double_p(tmp);
+	return (SUCCESS);
 }
 
-int	collect_data(t_config **conf, char **av, int fd)
+static t_map	*collect_data(t_config **conf, char **av, int fd)
 {
-	int	i;
+	int		i;
+	t_map	*map;
 
 	i = -1;
-	(*conf)->file_size = text_size(av, fd);
+	init_map_struct(conf);
+	if (!(*conf)->map)
+		return (NULL);
+	map = (*conf)->map;
+	map->file_size = text_size(av, fd);
+	if (!map->file_size)
+		return (free_void_err(conf, LEN_ERR));
+	map->file = malloc(sizeof(char *) * (map->file_size + 1));
+	if (!map->file)
+		return (free_void_err(conf, MALLOC_ERR));
 	fd = open(av[1], O_RDONLY);
-	if (fd < 0)
-		return (ft_putendl_fd(OPEN_ERR, STDERR_FILENO));
-	(*conf)->file = malloc(sizeof(char *) * ((*conf)->file_size + 1));
-	if (!(*conf)->file)
-		return (ft_putendl_fd(MALLOC_ERR, STDERR_FILENO));
-	while (++i < (*conf)->file_size)
-		(*conf)->file[i] = get_next_line(fd);
-	(*conf)->file[i] = NULL;
-	return (0);
-}
-
-static int	check_extension(char *str)
-{
-	int	len;
-	int	fd;
-
-	len = ft_strlen(str);
-	fd = open(str, O_DIRECTORY);
-	if (fd >= 0)
-	{
-		if (close(fd) == -1)
-			return (ft_putendl_fd(CLOSE_ERR, STDERR_FILENO));
-		return (ft_putendl_fd(DIR_ERR, STDERR_FILENO));
-	}
-	fd = open(str, O_RDONLY);
-	if (fd < 0)
-		return (ft_putendl_fd(OPEN_ERR, STDERR_FILENO));
-	if ((str[len - 4] == '.' && str[len - 3] == 'c'
-		&& str[len - 2] == 'u' && str[len - 1] == 'b'))
-		return (0);
-	if (close(fd) == -1)
-		return (ft_putendl_fd(CLOSE_ERR, STDERR_FILENO));
-	return (FAILS);
+	while (++i < map->file_size)
+		map->file[i] = get_next_line(fd);
+	map->file[i] = NULL;
+	close(fd);
+	return (map);
 }
 
 int	parse_data(t_config **conf, char **av)
@@ -98,16 +96,14 @@ int	parse_data(t_config **conf, char **av)
 	int	fd;
 
 	fd = 0;
-	*conf = malloc(sizeof(t_config));
-	if (!conf)
-		return (ft_putendl_fd(MALLOC_ERR, STDERR_FILENO));
-	if (check_extension(av[1]) == FAILS)
-		return (FAILS);
-	else if (collect_data(conf, av, fd) == -1 || find_map(conf) == -1)
-		return (FAILS);
-	else if (inspect_map(conf) == -1)
-		return (FAILS);
-	else if (check_data(conf) == 2)
-		return (2);
-	return (0);
+	if (init_config(conf) < 0)
+		return (MAP_ERR);
+	(*conf)->map = collect_data(conf, av, fd);
+	if (!(*conf)->map)
+		return (free_table_err(conf, NULL, MAP_ERR));
+	if (find_map(conf) < 0 || inspect_map(conf) < 0)
+		return (free_table_err(conf, NULL, MAP_ERR));
+	if (init_texture_vars(conf) < 0 || init_map_data(conf) == DATA_ERR)
+		return (free_table_err(conf, NULL, DATA_ERR));
+	return (SUCCESS);
 }
