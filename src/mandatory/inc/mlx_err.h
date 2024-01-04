@@ -1,1 +1,0 @@
-# define INIT_ERR "Error\nFailed at mlx_init()"
